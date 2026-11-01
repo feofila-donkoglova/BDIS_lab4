@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, Float, String, DateTime, Time, Enum as SQLEnum, ForeignKey
+from sqlalchemy import Column, Integer, Float, String, DateTime, Time, Enum as SQLEnum, ForeignKey, Boolean
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -31,13 +31,13 @@ class WindRecord(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     weather_id = Column(Integer, ForeignKey("weather_records.id", ondelete="CASCADE"), nullable=False, unique=True)
 
-    # Всі колонки вітру переїхали сюди
     wind_degree = Column(Integer, nullable=False)
     wind_kph = Column(Float, nullable=False)
     wind_direction = Column(SQLEnum(WindDirectionEnum), nullable=False)
     wind_mph = Column(Float, nullable=True)
     wind_gust_mph = Column(Float, nullable=True)
     wind_gust_kph = Column(Float, nullable=True)
+    is_safe_to_go_outside = Column(Boolean, nullable=True)
 
     weather = relationship("WeatherRecord", back_populates="wind")
 
@@ -48,6 +48,6 @@ class WeatherRecord(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     country = Column(String(100), nullable=False)
     last_updated = Column(DateTime, nullable=False)
-    sunrise = Column(String(50), nullable=True)
+    sunrise = Column(Time, nullable=True)
 
     wind = relationship("WindRecord", back_populates="weather", uselist=False, cascade="all, delete-orphan")
