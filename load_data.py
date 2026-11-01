@@ -4,7 +4,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import WeatherRecord, WindDirectionEnum
 
-# Твоє підключення
 DATABASE_URL = "postgresql+psycopg2://postgres:3489@localhost:5432/weather_db"
 
 engine = create_engine(DATABASE_URL)
@@ -19,13 +18,11 @@ def load_csv_to_db(csv_path):
     records_to_insert = []
 
     for index, row in df.iterrows():
-        # Безпечна обробка дати
         try:
             last_upd = datetime.strptime(str(row.get('last_updated', '')), '%Y-%m-%d %H:%M')
         except (ValueError, TypeError):
             last_upd = datetime.now()
 
-        # Безпечна обробка Enum (дефолт 'N' - Північ)
         try:
             raw_dir = row.get('wind_direction') or row.get('wind_dir') or 'N'
             wind_dir_val = str(raw_dir).upper()
@@ -33,7 +30,6 @@ def load_csv_to_db(csv_path):
         except ValueError:
             wind_dir = WindDirectionEnum.N
 
-        # Створення запису на основі наявної ORM-моделі
         record = WeatherRecord(
             country=row.get('country', 'Unknown'),
             wind_degree=row.get('wind_degree', 0),
@@ -45,7 +41,6 @@ def load_csv_to_db(csv_path):
 
         records_to_insert.append(record)
 
-        # Зберігаємо пачками по 1000 для швидкості
         if len(records_to_insert) >= 1000:
             session.bulk_save_objects(records_to_insert)
             session.commit()
